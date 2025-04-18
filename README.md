@@ -14,3 +14,24 @@
 
 Perfect for users who want a straightforward solution without unnecessary bloat.  
 **Your privacy matters — no data is collected and no ads are shown.**
+
+## 🔒 License
+
+This project is protected. All rights reserved.  
+Unauthorized copying or redistribution is prohibited.  
+Contact the author for permission.
+
+---
+
+## 🛠️ Requirements
+
+- Python 3.x  
+- OpenCV (`pip install opencv-python`)  
+- Pillow (`pip install Pillow`)
+
+---
+
+## 📂 How to Run
+
+```bash
+python easy_image_compressor.py
