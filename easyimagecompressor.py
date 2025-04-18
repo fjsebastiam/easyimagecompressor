@@ -6,6 +6,18 @@ import threading
 from PIL import Image, ImageTk
 import os
 import math
+import sys
+
+
+# Detectar si estamos corriendo desde un ejecutable creado con PyInstaller
+def resource_path(relative_path):
+    try:
+        # PyInstaller lo pone todo en _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 file_paths = []  # Variable global para almacenar las rutas de los archivos seleccionados
 selected_images = set()  # Conjunto para rastrear las imágenes seleccionadas
@@ -135,7 +147,8 @@ def compress_selected_files(progress_label_top):
 
 # Crear la ventana principal
 root = tk.Tk()
-root.title("Compresor de Imágenes")
+root.iconbitmap(resource_path("easyImageCompressor.ico"))
+root.title("EasyImageCompressor - Compresor de Imágenes")
 root.geometry("850x500")  # Ancho de 850 píxeles
 root.maxsize(850, 500)  # Establecer el tamaño máximo
 
