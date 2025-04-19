@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import ttk
+from tkinter import messagebox
 import cv2
 import threading
 from PIL import Image, ImageTk
@@ -133,16 +134,33 @@ def compress_selected_files(progress_label_top):
     selected_images_paths = [file_paths[i] for i in selected_images if i < len(file_paths)]
     if not selected_images_paths or not destination_folder:
         return
-    
+
     progress_var = tk.IntVar()
     compression_percentage = compression_scale.get()
 
     progress_label_top["text"] = "Progreso: 0%"
+    total_images = len(selected_images_paths)
+
+    # Contador para saber cuándo todas las imágenes han sido procesadas
+    completed_threads = []
+
+    def on_image_compressed():
+        completed_threads.append(1)
+        porcentaje = int((len(completed_threads) / total_images) * 100)
+        progress_label_top["text"] = f"Progreso: {porcentaje}%"
+        if len(completed_threads) == total_images:
+            # Mostrar mensaje cuando termine todo
+            tk.messagebox.showinfo("Completado", "Compresión realizada con éxito")
+            clear_preview()  # Limpiar interfaz y selecciones
+
+    def compress_and_callback(input_path, output_path):
+        compress_image(input_path, output_path, compression_percentage, progress_var, progress_label_top)
+        root.after(0, on_image_compressed)  # Callback en el hilo principal
 
     for input_path in selected_images_paths:
         _, file_name = os.path.split(input_path)
         output_path = os.path.join(destination_folder, file_name)
-        thread = threading.Thread(target=compress_image, args=(input_path, output_path, compression_percentage, progress_var, progress_label_top))
+        thread = threading.Thread(target=compress_and_callback, args=(input_path, output_path))
         thread.start()
 
 # Crear la ventana principal
