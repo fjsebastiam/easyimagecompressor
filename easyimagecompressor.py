@@ -24,6 +24,7 @@ file_paths = []  # Variable global para almacenar las rutas de los archivos sele
 selected_images = set()  # Conjunto para rastrear las imágenes seleccionadas
 image_labels = []  # Lista para almacenar las etiquetas de imagen
 images_per_row = 7  # Número de imágenes por fila
+checkbox_vars = []  # NUEVO: lista de (IntVar, Checkbutton)
 
 def get_image_info(file_path):
     file_name = os.path.basename(file_path)
@@ -54,6 +55,7 @@ def clear_preview():
     file_paths.clear()
     selected_images.clear()
     check_compress_button_state()
+    checkbox_vars.clear()
 
 def toggle_image_selection(index):
     if index in selected_images:
@@ -125,7 +127,7 @@ def show_image_preview(file_path):
     var = tk.IntVar()
     checkbox = tk.Checkbutton(frame, variable=var, cursor="hand2", command=lambda path=file_path: toggle_selection_by_path(path))
     checkbox.place(relx=1.0, rely=1.0, anchor="se")
-
+    checkbox_vars.append((var, checkbox))
     # Posición en grid
     total_frames = len(image_labels)
     row = total_frames // images_per_row
@@ -216,6 +218,28 @@ def compress_selected_files(progress_label_top):
         thread = threading.Thread(target=compress_and_callback, args=(input_path, output_path))
         thread.start()
 
+# Atajos de teclado
+def bind_shortcuts(root, file_paths, selected_images, check_compress_button_state):
+    def select_all(event=None):
+        selected_images.clear()
+        selected_images.update(range(len(file_paths)))
+        for i, (var, checkbox) in enumerate(checkbox_vars):
+            var.set(1)
+        check_compress_button_state()
+        return "break"
+
+    def deselect_all(event=None):
+        selected_images.clear()
+        for var, checkbox in checkbox_vars:
+            var.set(0)
+        check_compress_button_state()
+        return "break"
+
+    root.bind_all("<Control-a>", select_all)
+    root.bind_all("<Control-A>", select_all)
+    root.bind_all("<Control-x>", deselect_all)
+    root.bind_all("<Control-X>", deselect_all)
+
 # Crear la ventana principal
 root = tk.Tk()
 root.iconbitmap(resource_path("easyImageCompressor.ico"))
@@ -277,6 +301,9 @@ frame_images_canvas.bind("<Configure>", lambda event, canvas=canvas: canvas.conf
 # Crear una Label en la parte superior para mostrar el progreso
 progress_label_top = tk.Label(root, text="Progreso: 0%", bg="gray", fg="white", anchor="w", padx=5)
 progress_label_top.pack(side="top", fill="x")
+
+# Atajos de teclado
+bind_shortcuts(root, file_paths, selected_images, check_compress_button_state)
 
 # Iniciar la ventana
 root.mainloop()
