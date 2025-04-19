@@ -49,10 +49,10 @@ def add_image_previews(new_file_paths):
 
 def clear_preview():
     for label in image_labels:
-        label.destroy()  # Destruir las etiquetas de imagen
+        label.destroy()  # Destruir los frames que contienen imagen + checkbox
     image_labels.clear()
-    file_paths.clear()  # Limpiar la lista de rutas de archivos
-    selected_images.clear()  # Limpiar las imágenes seleccionadas
+    file_paths.clear()
+    selected_images.clear()
     check_compress_button_state()
 
 def toggle_image_selection(index):
@@ -65,32 +65,74 @@ def toggle_image_selection(index):
     check_compress_button_state()
 
 def show_image_preview(file_path):
-    global image_labels  # Hacer que image_labels sea una variable global
+    global image_labels
+
+    index = len(file_paths) - 1
     original_image = Image.open(file_path)
     resized_image = original_image.resize((100, 100))
     tk_image = ImageTk.PhotoImage(resized_image)
 
-    # Crear una etiqueta para mostrar la imagen
-    image_label = tk.Label(frame_images_canvas, image=tk_image, borderwidth=2, relief="solid", highlightbackground="black")
+    # Frame contenedor
+    frame = tk.Frame(frame_images_canvas, width=100, height=100)
+    frame.grid_propagate(False)
+
+    # Imagen
+    image_label = tk.Label(frame, image=tk_image, borderwidth=2, relief="solid", highlightbackground="black")
     image_label.image = tk_image
+    image_label.pack(fill="both", expand=True)
 
-    # Crear una casilla de verificación (checkbox) para cada imagen
+    # Función para borrar imagen individual
+    def remove_image():
+        if file_path in file_paths:
+            idx = file_paths.index(file_path)
+            file_paths.pop(idx)
+
+            # Eliminar de seleccionadas si estaba seleccionada
+            if idx in selected_images:
+                selected_images.remove(idx)
+
+            # Reajustar los índices de las imágenes seleccionadas restantes
+            updated_selection = set()
+            for i in selected_images:
+                if i > idx:
+                    updated_selection.add(i - 1)
+                elif i < idx:
+                    updated_selection.add(i)
+            selected_images.clear()
+            selected_images.update(updated_selection)
+
+        frame.destroy()
+        image_labels.remove(frame)
+        update_image_grid()
+        check_compress_button_state()
+    
+    # Botón de eliminar (X)
+    delete_button = tk.Button(
+        frame,
+        text="✖",
+        command=remove_image,
+        bg="red",
+        fg="white",
+        bd=0,
+        padx=2,
+        pady=0,
+        font=("Arial", 9, "bold"),
+        cursor="hand2"  # <--- aquí se activa la mano
+    )
+    delete_button.place(relx=0.0, rely=0.0, anchor="nw")  # <-- esquina superior izquierda
+
+    # Checkbox de selección
     var = tk.IntVar()
-    checkbox = tk.Checkbutton(frame_images_canvas, variable=var, command=lambda i=len(image_labels): toggle_image_selection(i))
-    
-    # Colocar la imagen
-    image_row = len(image_labels) // images_per_row
-    image_column = len(image_labels) % images_per_row
-    image_label.grid(row=image_row, column=image_column, padx=5, pady=5, sticky="w")
-    
-    # Colocar el checkbox sobre la imagen
-    checkbox.place(in_=image_label, relx=0.5, rely=0.5, anchor="c")
-    
-    # Agregar la etiqueta e checkbox al frame
-    image_labels.append(image_label)
-    image_labels.append(checkbox)
+    checkbox = tk.Checkbutton(frame, variable=var, cursor="hand2", command=lambda path=file_path: toggle_selection_by_path(path))
+    checkbox.place(relx=1.0, rely=1.0, anchor="se")
 
-    update_image_grid()
+    # Posición en grid
+    total_frames = len(image_labels)
+    row = total_frames // images_per_row
+    col = total_frames % images_per_row
+    frame.grid(row=row, column=col, padx=5, pady=5)
+
+    image_labels.append(frame)
 
 def update_image_grid():
     total_images = len(image_labels)
@@ -110,6 +152,17 @@ def set_destination_folder():
     destination_folder = filedialog.askdirectory()
     check_compress_button_state()
 
+def toggle_selection_by_path(path):
+    try:
+        index = file_paths.index(path)
+        if index in selected_images:
+            selected_images.remove(index)
+        else:
+            selected_images.add(index)
+    except ValueError:
+        # Por si el path ya no existe en la lista
+        pass
+    check_compress_button_state()
 def compress_image(input_path, output_path, compression_percentage, progress_var, progress_label_top):
     # Obtener el tipo de archivo
     _, file_extension = os.path.splitext(input_path)
