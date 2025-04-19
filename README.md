@@ -6,6 +6,16 @@
 
 ✅ **Fast and efficient batch compression**  
 ✅ **Clean and easy-to-use interface**  
+✅ **Drag-and-select or batch-select images**  
+✅ **Compress JPG and PNG formats**  
+✅ **Real-time progress tracking**  
+✅ **Live preview of image thumbnails**  
+✅ **Delete images individually from preview list**  
+✅ **Keyboard shortcuts: Ctrl+A to select all, Ctrl+X to deselect all**  
+✅ **Compression percentage control via slider**  
+✅ **Displays total saved space after compression**  
+✅ **Fully offline — no internet required**  
+✅ **Responsive UI design**  
 ✅ **No data collection**  
 ✅ **No ads, no tracking**  
 ✅ **100% free and open source**
@@ -14,6 +24,8 @@
 
 Perfect for users who want a straightforward solution without unnecessary bloat.  
 **Your privacy matters — no data is collected and no ads are shown.**
+
+---
 
 ## 🔒 License
 
@@ -27,7 +39,8 @@ Contact the author for permission.
 
 - Python 3.x  
 - OpenCV (`pip install opencv-python`)  
-- Pillow (`pip install Pillow`)
+- Pillow (`pip install Pillow`)  
+- Tkinter (comes pre-installed with Python)
 
 ---
 
@@ -49,4 +62,14 @@ Compile the proyect (create programar.exe)
 pyinstaller easyImageCompressor.spec
 ```
 
+---
+
+##  💡 Tips
+Use the ✖ button on each image to remove it from the list.
+
+Once compressed, a summary shows the total space saved.
+
+The interface is fully responsive, and the top section is visually separated from the image gallery.
+
+If the compression button is disabled, it will not show the "click" cursor, only once it's available.
 
