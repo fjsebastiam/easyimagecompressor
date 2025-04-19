@@ -1,15 +1,14 @@
 import tkinter as tk
-from tkinter import filedialog
-from tkinter import ttk
-from tkinter import messagebox
-import cv2
-import threading
+from tkinter import filedialog, ttk, messagebox
 from PIL import Image, ImageTk
+import threading
 import os
 import math
 import sys
+import ctypes 
+myappid = 'easyimagecompressor.app.1.0' 
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
-# Obtener ruta al recurso, compatible con PyInstaller
 def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS
@@ -17,18 +16,15 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
-# Variables globales
 file_paths = []
 selected_images = set()
 image_labels = []
 checkbox_vars = []
 images_per_row = 7
 
-# Calcular calidad desde porcentaje
 def calculate_quality(percentage):
     return int(95 - (percentage * 0.94))
 
-# Formatear bytes a texto legible
 def format_bytes(size_in_bytes):
     kb, mb, gb = 1024, 1024 ** 2, 1024 ** 3
     if size_in_bytes >= gb:
@@ -38,25 +34,21 @@ def format_bytes(size_in_bytes):
     else:
         return f"{size_in_bytes / kb:.2f} KB"
 
-# Reubicar previews al reorganizar
 def update_image_grid():
     for i, item in enumerate(image_labels):
         row, col = divmod(i, images_per_row)
         item.grid(row=row, column=col, padx=5, pady=5, sticky="w")
 
-# Activar botón si hay imágenes seleccionadas
 def check_compress_button_state():
     selected_images_paths = [file_paths[i] for i in selected_images if i < len(file_paths)]
     compress_button["state"] = "normal" if selected_images_paths and destination_folder else "disabled"
     selected_label.config(text=f"Seleccionadas: {len(selected_images)}")
 
-# Seleccionar carpeta destino
 def set_destination_folder():
     global destination_folder
     destination_folder = filedialog.askdirectory()
     check_compress_button_state()
 
-# Seleccionar/deseleccionar imagen por path
 def toggle_selection_by_path(path):
     try:
         index = file_paths.index(path)
@@ -65,7 +57,6 @@ def toggle_selection_by_path(path):
         pass
     check_compress_button_state()
 
-# Limpiar previews y selección
 def clear_preview():
     for label in image_labels:
         label.destroy()
@@ -75,7 +66,6 @@ def clear_preview():
     checkbox_vars.clear()
     check_compress_button_state()
 
-# Mostrar una imagen como preview con checkbox y botón eliminar
 def show_image_preview(file_path):
     global image_labels
     original_image = Image.open(file_path)
@@ -117,29 +107,21 @@ def show_image_preview(file_path):
     checkbox.place(relx=1.0, rely=1.0, anchor="se")
     checkbox_vars.append((var, checkbox))
     image_labels.append(frame)
-
     update_image_grid()
 
-# Abrir selector y añadir imágenes
 def select_files():
     global file_paths
-    new_file_paths = filedialog.askopenfilenames(filetypes=[("Image Files", "*.jpg *.jpeg *.png *.gif *.bmp *.tiff *.webp")])
+    new_file_paths = filedialog.askopenfilenames(filetypes=[("Image Files", "*.jpg *.jpeg *.png")])
     file_paths.extend(new_file_paths)
     for path in new_file_paths:
         show_image_preview(path)
     check_compress_button_state()
 
-# Comprimir imagen con OpenCV
 def compress_image(input_path, output_path, compression_percentage):
-    _, file_extension = os.path.splitext(input_path)
     quality = calculate_quality(compression_percentage)
-    image = cv2.imread(input_path)
-    if file_extension.lower() in ['.jpg', '.jpeg']:
-        cv2.imwrite(output_path, image, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
-    elif file_extension.lower() == '.png':
-        cv2.imwrite(output_path, image, [int(cv2.IMWRITE_PNG_COMPRESSION), quality])
+    image = Image.open(input_path)
+    image.save(output_path, quality=quality, optimize=True)
 
-# Comprimir todas las seleccionadas
 def compress_selected_files():
     selected_images_paths = [file_paths[i] for i in selected_images if i < len(file_paths)]
     if not selected_images_paths or not destination_folder:
@@ -172,7 +154,6 @@ def compress_selected_files():
     for path in selected_images_paths:
         threading.Thread(target=compress_and_track, args=(path,)).start()
 
-# Atajos de teclado Ctrl+A y Ctrl+X
 def bind_shortcuts():
     def select_all(event=None):
         selected_images.clear()
@@ -194,10 +175,9 @@ def bind_shortcuts():
     root.bind_all("<Control-x>", deselect_all)
     root.bind_all("<Control-X>", deselect_all)
 
-# Interfaz
 root = tk.Tk()
 root.iconbitmap(resource_path("easyImageCompressor.ico"))
-root.title("EasyImageCompressor - Compresor de Imágenes")
+root.title("EasyImageCompressor - Pillow Version")
 root.geometry("850x500")
 root.maxsize(850, 500)
 destination_folder = None

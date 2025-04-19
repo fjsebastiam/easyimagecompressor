@@ -17,12 +17,12 @@ VSVersionInfo(
         [
         StringStruct('CompanyName', 'Fjsebastiam'),
         StringStruct('FileDescription', 'EasyImageCompressor - Batch image compression tool'),
-        StringStruct('FileVersion', '1.1.0'),
+        StringStruct('FileVersion', '1.0.0'),
         StringStruct('InternalName', 'EasyImageCompressor'),
         StringStruct('LegalCopyright', '© 2025 Fjsebastiam'),
         StringStruct('OriginalFilename', 'easyImageCompressor.exe'),
         StringStruct('ProductName', 'EasyImageCompressor'),
-        StringStruct('ProductVersion', '1.1.0')
+        StringStruct('ProductVersion', '1.0.0')
         ])
       ]),
     VarFileInfo([VarStruct('Translation', [1033, 1200])])
