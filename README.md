@@ -35,3 +35,18 @@ Contact the author for permission.
 
 ```bash
 python easy_image_compressor.py
+```
+
+---
+
+## 🧱 How to Build / Compile (.exe)
+Install pyinstaller
+```bash
+pip install pyinstaller
+```
+Compile the proyect (create programar.exe)
+```bash
+pyinstaller easyImageCompressor.spec
+```
+
+
