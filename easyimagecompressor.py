@@ -205,8 +205,12 @@ def compress_selected_files(progress_label_top):
         progress_label_top["text"] = f"Progreso: {porcentaje}%"
         if len(completed_threads) == total_images:
             # Mostrar mensaje cuando termine todo
+            total_original_size = sum(os.path.getsize(p) for p in selected_images_paths)
+            total_compressed_size = sum(os.path.getsize(os.path.join(destination_folder, os.path.basename(p))) for p in selected_images_paths)
+            saved = total_original_size - total_compressed_size
+            saved_space_label.config(text=f"Espacio ahorrado: {format_bytes(saved)}")
             tk.messagebox.showinfo("Completado", "Compresión realizada con éxito")
-            clear_preview()  # Limpiar interfaz y selecciones
+            clear_preview()
 
     def compress_and_callback(input_path, output_path):
         compress_image(input_path, output_path, compression_percentage, progress_var, progress_label_top)
@@ -239,6 +243,17 @@ def bind_shortcuts(root, file_paths, selected_images, check_compress_button_stat
     root.bind_all("<Control-A>", select_all)
     root.bind_all("<Control-x>", deselect_all)
     root.bind_all("<Control-X>", deselect_all)
+# Función para formatear el tamaño legible
+def format_bytes(size_in_bytes):
+    kb = 1024
+    mb = kb * 1024
+    gb = mb * 1024
+    if size_in_bytes >= gb:
+        return f"{size_in_bytes / gb:.2f} GB"
+    elif size_in_bytes >= mb:
+        return f"{size_in_bytes / mb:.2f} MB"
+    else:
+        return f"{size_in_bytes / kb:.2f} KB"
 
 # Crear la ventana principal
 root = tk.Tk()
@@ -301,6 +316,10 @@ frame_images_canvas.bind("<Configure>", lambda event, canvas=canvas: canvas.conf
 # Crear una Label en la parte superior para mostrar el progreso
 progress_label_top = tk.Label(root, text="Progreso: 0%", bg="gray", fg="white", anchor="w", padx=5)
 progress_label_top.pack(side="top", fill="x")
+
+# Etiqueta para mostrar espacio ahorrado
+saved_space_label = tk.Label(root, text="Espacio ahorrado: N/A", bg="gray", fg="white", anchor="e", padx=5)
+saved_space_label.pack(side="bottom", fill="x", anchor="e")
 
 # Atajos de teclado
 bind_shortcuts(root, file_paths, selected_images, check_compress_button_state)
